@@ -75,9 +75,23 @@ def pick(candidates):
 def main():
     message = pick(CANDIDATES)
     import os
+    import sys
     os.makedirs("/output", exist_ok=True)
     with open("/output/entry.txt", "w", encoding="utf-8") as f:
         f.write(message)
+    # Verify: read the output back byte-for-byte and re-check the gate,
+    # so a partial write or an encoding slip fails loudly instead of
+    # silently submitting a broken entry.
+    with open("/output/entry.txt", "rb") as f:
+        raw = f.read()
+    if raw.decode("utf-8") != message:
+        print("error: /output/entry.txt does not match the selected message",
+              file=sys.stderr)
+        sys.exit(1)
+    if not (1 <= len(message) <= 120) or "\n" in message or not message.strip():
+        print("error: selected message fails the gate (1-120 chars, one line)",
+              file=sys.stderr)
+        sys.exit(1)
     print(message)
 
 
