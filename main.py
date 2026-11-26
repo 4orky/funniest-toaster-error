@@ -36,8 +36,24 @@ def _rank(pool):
             top_key = ranking
             top_text = draft
     return top_text
+def _vet_chosen_sentence(picked_line):
+    # Last look at the champion before anything leaves this script.
+    span = len(picked_line)
+    if span != 66:
+        _sys.exit("final pick failed its length audit")
+    if not picked_line.startswith("ERROR 418:"):
+        _sys.exit("final pick lost its error-code opening")
+    if "toaster, not a teapot" not in picked_line:
+        _sys.exit("final pick lost its toaster-versus-teapot turn")
+    if not picked_line.endswith("confusing us."):
+        _sys.exit("final pick lost its closing plea")
+    if "  " in picked_line:
+        _sys.exit("final pick carries a doubled gap")
+    if picked_line.count("418") != 1:
+        _sys.exit("final pick carries a wrong error-code count")
 def _run():
     line = _rank(_POOL)
+    _vet_chosen_sentence(line)
     target = _pathlib.Path("/output/entry.txt")
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_bytes(line.encode("utf-8"))
